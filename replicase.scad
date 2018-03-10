@@ -215,6 +215,9 @@ module case_top() {
                 translate([ctrl_off, y-e, shell+top_h-ctrl_z])
                     cube([ctrl_w, shell+2*e, ctrl_z+e]);
             }
+            // let some air out above usb/ethernet side
+            translate([shell, shell*3, shell]) rotate([0, 0, 90])
+                ventilate(d-shell*2, top_h);
         }
     }
     for (o=[
