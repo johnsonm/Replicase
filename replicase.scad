@@ -248,9 +248,29 @@ module case_top() {
                 zr = labels[3];
                 translate([x, y, ctrl_z])
                     rotate([90, 180, zr])
-                    linear_extrude(height=in)
+                    linear_extrude(height=in+2*e)
                     text(t, size=4, valign="bottom", halign="center");
             }
+            for (labels=[
+                    ["V+", 0],
+                    ["V+", 5],
+                    ["V-", 10],
+                    ["V-", 15],
+                    ["E-", 22],
+                    ["E+", 28],
+                    ["B-", 35],
+                    ["B-", 40],
+                    ["B+", 45],
+                    ["B+", 50],
+                    ["H-", 57],
+                    ["H+", 62],
+                ]) {
+                t = labels[0];
+                y = labels[1] + 4 + molex_off; // indexed from first pin
+                translate([w+(2*shell)-in, y, shell/2+top_h-molex_z])
+                    rotate([0, 90, 0])
+                    linear_extrude(height=in+2*e)
+                    text(t, size=3, valign="center", halign="left");            }
         }
     }
     for (o=[
