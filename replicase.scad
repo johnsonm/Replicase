@@ -164,7 +164,7 @@ module case_bottom() {
     difference() {
         union() {
             cube([w+shell*2, d+shell*2, shell+in_h]);
-            bottom_flange(0, 0, w, d);
+            bottom_flange(0, 0, w+shell*2, d+shell*2);
         }
         union() {
             // box inside
@@ -290,5 +290,5 @@ module case_top() {
     }
 }
 case_bottom();
-translate([0, d+flange+3*shell, 0])
+translate([0, d+flange+5*shell, 0])
     case_top();
