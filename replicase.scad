@@ -218,6 +218,39 @@ module case_top() {
             // let some air out above usb/ethernet side
             translate([shell, shell*3, shell]) rotate([0, 0, 90])
                 ventilate(d-shell*2, top_h);
+            // labels
+            in=(shell/2)-e;
+            rin=d+2*shell-in+(2*e);
+            for (labels=[
+                    ["Z2", 15, rin, 180],
+                    ["Y2", 24, rin, 180],
+                    ["X2", 32, rin, 180],
+                    ["Z1", 40, rin, 180],
+                    ["Y1", 48, rin, 180],
+                    ["Z1", 56, rin, 180],
+                    ["H", 64, rin, 180],
+                    ["B", 70, rin, 180],
+                    ["E", 76, rin, 180],
+                    ["1W", 85, rin, 180],
+                    ["X", 85, in, 0],
+                    ["Y", 74, in, 0],
+                    ["Z", 63, in, 0],
+                    ["E", 52, in, 0],
+                    ["H", 41, in, 0],
+                    ["F0", 32, in, 0],
+                    ["F1", 24, in, 0],
+                    ["F2", 16, in, 0],
+                    ["F3", 8, in, 0],
+                ]) {
+                t = labels[0];
+                x = labels[1] + shell;
+                y = labels[2];
+                zr = labels[3];
+                translate([x, y, ctrl_z])
+                    rotate([90, 180, zr])
+                    linear_extrude(height=in)
+                    text(t, size=4, valign="bottom", halign="center");
+            }
         }
     }
     for (o=[
