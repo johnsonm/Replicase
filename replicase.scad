@@ -6,16 +6,16 @@ fan_screw_off = 36;
 shell = 2;
 
 screw_d = 2.26; // diameter of holes for assembly screws
-pcb_z = 1.6; // thickness of PCB
+pcb_z = 1.4; // thickness of PCB
 
 w = 111; // x interior dimension
 d = 81; // y interior dimension
 y_off = 14; // BB offset from inside of shell
-io_off = 4; // power/usb offset from board edge
+io_off = 3; // power/usb offset from board edge
 io_width = 36;
-usb_off = 38; // USB port under board offset from board edge
-usb_width = 14; // enough room to actually plug in a cable
-usb_h = 6; // height of micro/mini usb cutout
+usb_off = 39.5; // USB port under board offset from board edge
+usb_width = 12; // enough room to actually plug in a cable
+usb_h = 7; // height of micro/mini usb cutout
 s_h = 8; // height of standoffs above shell in z (bottom of pcb)
 s_d = 6; // diameter of standoff column
 c_h = 5; // height above standoff of standoff pcb clip
@@ -42,6 +42,7 @@ module standoff(x, y, z, r) {
     // standoff with screw hole (at origin) and integrated clip
     $fn = 30;
     s_r = s_d/2;
+    c_d = s_r/3;
     translate([x, y, z]) rotate([0, 0, r]) {
         // body below clip
         difference() {
@@ -59,7 +60,7 @@ module standoff(x, y, z, r) {
                 cube([s_r, s_d, c_h-pcb_z]);
             translate([s_r, -s_r, s_h+((c_h-pcb_z)/2)+pcb_z])
                 rotate([-90, 0, 0])
-                cylinder(d=s_r/2, h=s_d);
+                cylinder(d=c_d, h=s_d);
         }
     }
 }
@@ -180,24 +181,24 @@ module case_bottom() {
             // BB ethernet/usb/power access
             translate([-e, shell+y_off+io_off, shell+s_h+pcb_z])
                 cube([shell+2*e, io_width, e+in_h-(s_h+pcb_z)]);
-            translate([-e, shell+y_off+usb_off, shell+s_h-usb_h])
+            translate([-e, shell+y_off+usb_off, shell+s_h-usb_h+(pcb_z/2)])
                 cube([shell+2*e, usb_width, usb_h]);
         }
     }
     // location of mounting holes from BB SRM
-    standoff(inches(0.575), shell+y_off+inches(0.125), shell, 270);
-    standoff(inches(0.575), shell+y_off+inches(2.025), shell, 90);
-    standoff(inches(3.175), shell+y_off+inches(0.25), shell, -45);
-    standoff(inches(3.175), shell+y_off+inches(1.9), shell, 45);
+    standoff(shell+inches(0.575), shell+y_off+inches(0.125), shell, 270);
+    standoff(shell+inches(0.575), shell+y_off+inches(2.025), shell, 90);
+    standoff(shell+inches(3.175), shell+y_off+inches(0.25), shell, -45);
+    standoff(shell+inches(3.175), shell+y_off+inches(1.9), shell, 45);
     // top case clips
     for (o=[
         [0, 0],
         [0, d],
         [w-top_clip_len, 0],
         [w-top_clip_len, d]]) {
-        translate([shell+o[0], shell+o[1], shell+in_h-top_clip_offset])
+        translate([shell+o[0], shell+o[1], shell/2+in_h-top_clip_offset])
             rotate([0, 90, 0])
-            cylinder(r=shell, h=top_clip_len, $fn=30);
+            cylinder(r=shell/2, h=top_clip_len, $fn=30);
     }
 };
 module case_top() {
@@ -232,11 +233,11 @@ module case_top() {
                     ["B", 70, rin, 180],
                     ["E", 76, rin, 180],
                     ["1W", 85, rin, 180],
-                    ["X", 85, in, 0],
-                    ["Y", 74, in, 0],
-                    ["Z", 63, in, 0],
-                    ["E", 52, in, 0],
-                    ["H", 41, in, 0],
+                    ["X", 87, in, 0],
+                    ["Y", 76, in, 0],
+                    ["Z", 65, in, 0],
+                    ["E", 54, in, 0],
+                    ["H", 43, in, 0],
                     ["F0", 32, in, 0],
                     ["F1", 24, in, 0],
                     ["F2", 16, in, 0],
@@ -249,7 +250,7 @@ module case_top() {
                 translate([x, y, ctrl_z])
                     rotate([90, 180, zr])
                     linear_extrude(height=in+2*e)
-                    text(t, size=4, valign="bottom", halign="center");
+                    text(t, size=4, valign="bottom", halign="center", font="Liberation Sans:style=Bold");
             }
             for (labels=[
                     ["V+", 0],
@@ -270,22 +271,22 @@ module case_top() {
                 translate([w+(2*shell)-in, y, shell/2+top_h-molex_z])
                     rotate([0, 90, 0])
                     linear_extrude(height=in+2*e)
-                    text(t, size=3, valign="center", halign="left");            }
+                    text(t, size=3, valign="center", halign="left", font="Liberation Sans:style=Bold");            }
         }
     }
     for (o=[
-            [shell, shell, shell, shell],
-            [shell+w-top_clip_len, shell, shell, shell],
-            [shell, d, -shell, 0],
-            [shell+w-top_clip_len, d, -shell, 0],
+            [shell, shell, 1],
+            [shell+w-top_clip_len, shell, 1],
+            [shell, d, -1],
+            [shell+w-top_clip_len, d, -1],
         ]) {
         translate([o[0], o[1], 0]) {
             cube([top_clip_len, shell, shell+top_h]);
-            translate([0, o[2], 0])
-                cube([top_clip_len, shell, shell+top_h+top_clip_offset+3*shell]);
-            translate([0, o[3], top_h+top_clip_offset+3*shell])
+            translate([0, o[2]*shell/2, 0])
+                cube([top_clip_len, shell, shell+top_h+top_clip_offset+2*shell]);
+            translate([0, shell/2, top_h+top_clip_offset+2.5*shell])
                 rotate([0, 90, 0])
-                cylinder(r=shell, h=top_clip_len, $fn=30);
+                cylinder(r=shell/2, h=top_clip_len, $fn=30);
         }
     }
 }
