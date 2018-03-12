@@ -34,8 +34,10 @@ hd = 3; // air holes
 m_d = 5.2; // diameter of mounting holes in flange
 flange = 10; // width of mounting flange
 
-sandwich_h = 13; // height from bottom of beaglebone PCB to top of mounted replicape PCB (bottom of molex connectors)
-in_h = s_h + sandwich_h;
+sandwich_h = 12; // height from bottom of beaglebone PCB to top of mounted replicape PCB (bottom of molex connectors)
+ethernet_h = 14; // height from top of beadlebone pcb to top of ethernet jack
+in_h = s_h + pcb_z + ethernet_h; // total interior height of base
+molex_h = s_h+sandwich_h; // total interior height of bottom of molex
 
 e = 0.01; // offset to avoid coincident surfaces to improve preview
 module standoff(x, y, z, r) {
@@ -177,12 +179,26 @@ module case_bottom() {
             translate([shell+hd, d+shell, shell])
                 ventilate(w-(2*hd), in_h);
             translate([w+shell*2, shell, shell]) rotate([0, 0, 90])
-                ventilate(d, in_h);
+                ventilate(d, molex_h);
             // BB ethernet/usb/power access
             translate([-e, shell+y_off+io_off, shell+s_h+pcb_z])
                 cube([shell+2*e, io_width, e+in_h-(s_h+pcb_z)]);
-            translate([-e, shell+y_off+usb_off, shell+s_h-usb_h+(pcb_z/2)])
+            // mini/micro USB
+            translate([-e, shell+y_off+usb_off, shell+pcb_z+s_h-usb_h+(pcb_z/2)])
                 cube([shell+2*e, usb_width, usb_h]);
+            // molex connectors
+            translate([shell+w-e, shell, shell+molex_h])
+                cube([shell+2*e, d, in_h-(molex_h)+e]);
+            // top case clip relief
+            for (o=[
+                [0, 0],
+                [0, d],
+                [w-top_clip_len, 0],
+                [w-top_clip_len, d]]) {
+                translate([shell+o[0], shell+o[1], shell+in_h-(top_clip_offset+shell/2)])
+                    rotate([0, 90, 0])
+                    cylinder(r=shell/2, h=top_clip_len, $fn=30);
+            }
         }
     }
     // location of mounting holes from BB SRM
@@ -190,16 +206,6 @@ module case_bottom() {
     standoff(shell+inches(0.575), shell+y_off+inches(2.025), shell, 90);
     standoff(shell+inches(3.175), shell+y_off+inches(0.25), shell, -45);
     standoff(shell+inches(3.175), shell+y_off+inches(1.9), shell, 45);
-    // top case clips
-    for (o=[
-        [0, 0],
-        [0, d],
-        [w-top_clip_len, 0],
-        [w-top_clip_len, d]]) {
-        translate([shell+o[0], shell+o[1], shell/2+in_h-top_clip_offset])
-            rotate([0, 90, 0])
-            cylinder(r=shell/2, h=top_clip_len, $fn=30);
-    }
 };
 module case_top() {
     // printed upside down
@@ -275,16 +281,17 @@ module case_top() {
         }
     }
     for (o=[
-            [shell, shell, 1],
-            [shell+w-top_clip_len, shell, 1],
-            [shell, d, -1],
-            [shell+w-top_clip_len, d, -1],
+            [shell, shell, 0],
+            [shell+w-top_clip_len, shell, 0],
+            [shell, d-(shell*1.5), shell*1.5],
+            [shell+w-top_clip_len, d-(shell/2), shell*1.5],
         ]) {
-        translate([o[0], o[1], 0]) {
-            cube([top_clip_len, shell, shell+top_h]);
-            translate([0, o[2]*shell/2, 0])
-                cube([top_clip_len, shell, shell+top_h+top_clip_offset+2*shell]);
-            translate([0, shell/2, top_h+top_clip_offset+2.5*shell])
+        x = o[0];
+        y = o[1];
+        off = o[2];
+        translate([x, y, 0]) {
+            cube([top_clip_len, shell*1.5, shell+top_h+top_clip_offset+shell]);
+            translate([0, off, top_h+top_clip_offset+1.5*shell])
                 rotate([0, 90, 0])
                 cylinder(r=shell/2, h=top_clip_len, $fn=30);
         }
