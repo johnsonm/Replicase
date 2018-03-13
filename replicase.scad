@@ -3,9 +3,11 @@
 fan_diameter = 80;
 fan_screw_d = 5;
 fan_screw_off = 36;
-shell = 2;
-
 screw_d = 2.26; // diameter of holes for assembly screws
+flange = 10; // width of mounting flange
+m_d = 5.2; // diameter of mounting holes in flange
+
+shell = 2;
 pcb_z = 1.4; // thickness of PCB
 
 w = 111; // x interior dimension
@@ -31,8 +33,6 @@ ctrl_z = 10;
 ctrl_off = 7;
 
 hd = 3; // air holes
-m_d = 5.2; // diameter of mounting holes in flange
-flange = 10; // width of mounting flange
 
 sandwich_h = 12; // height from bottom of beaglebone PCB to top of mounted replicape PCB (bottom of molex connectors)
 ethernet_h = 14; // height from top of beadlebone pcb to top of ethernet jack
