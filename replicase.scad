@@ -1,18 +1,23 @@
 // find an appropriate grill for the outside of the fan!
 
+// These parameters are generally meant to be modified
 fan_diameter = 80;
 fan_screw_d = 5;
 fan_screw_off = 36;
 screw_d = 2.26; // diameter of holes for assembly screws
 flange = 10; // width of mounting flange
 m_d = 5.2; // diameter of mounting holes in flange
+clip_d = 0.5; // size of board retention clip; as much as 1 for PETG
 
+// substantial modifications unlikely to work well
 shell = 2;
 pcb_z = 1.4; // thickness of PCB
 
+// these are considered internal variables and are not well-constrained
 w = 111; // x interior dimension
 d = 81; // y interior dimension
-y_off = 14; // BB offset from inside of shell
+bb_width = inches(2.15);
+y_off = d/2-bb_width/2 + inches(0.125); // BB edge offset from inside of shell
 io_off = 3; // power/usb offset from board edge
 io_width = 36;
 usb_off = 39.5; // USB port under board offset from board edge
@@ -27,7 +32,7 @@ top_clip_len = 5;
 top_h = 20;
 molex_z = 15;
 molex_d = 72;
-molex_off = (d-molex_d)/2; // center molex slot
+molex_off = d/2-molex_d/2; // center molex slot
 ctrl_w = 86;
 ctrl_z = 10;
 ctrl_off = 7;
@@ -35,16 +40,18 @@ ctrl_off = 7;
 hd = 3; // air holes
 
 sandwich_h = 12; // height from bottom of beaglebone PCB to top of mounted replicape PCB (bottom of molex connectors)
-ethernet_h = 14; // height from top of beadlebone pcb to top of ethernet jack
-in_h = s_h + pcb_z + ethernet_h; // total interior height of base
+ethernet_z = 3; // relief for ethernet etc. above beaglebone PCB
+in_h = s_h + pcb_z + sandwich_h; // total interior height of base
 molex_h = s_h+sandwich_h; // total interior height of bottom of molex
 
 e = 0.01; // offset to avoid coincident surfaces to improve preview
+function inches(i) = i / 0.039370079;
+
 module standoff(x, y, z, r) {
     // standoff with screw hole (at origin) and integrated clip
     $fn = 30;
     s_r = s_d/2;
-    c_d = s_r/3;
+    c_d = clip_d;
     translate([x, y, z]) rotate([0, 0, r]) {
         // body below clip
         difference() {
@@ -162,7 +169,6 @@ module ignorethis() {
         }
     }
 }
-function inches(i) = i / 0.039370079;
 module case_bottom() {
     difference() {
         union() {
@@ -190,14 +196,15 @@ module case_bottom() {
             translate([shell+w-e, shell, shell+molex_h])
                 cube([shell+2*e, d, in_h-(molex_h)+e]);
             // top case clip relief
+            len=top_clip_len*1.1; // room for fit
             for (o=[
                 [0, 0],
                 [0, d],
-                [w-top_clip_len, 0],
-                [w-top_clip_len, d]]) {
+                [w-len, 0],
+                [w-len, d]]) {
                 translate([shell+o[0], shell+o[1], shell+in_h-(top_clip_offset+shell/2)])
                     rotate([0, 90, 0])
-                    cylinder(r=shell/2, h=top_clip_len, $fn=30);
+                    cylinder(r=shell/2, h=len, $fn=30);
             }
         }
     }
@@ -214,8 +221,11 @@ module case_top() {
         union() {
             translate([shell, shell, shell]) cube([w, d, top_h+e]);
             fan_hole(shell+w/2, shell+d/2);
+            // ethernet relief (io_off and y_off upside down)
+            translate([-e, shell+d-(io_off+y_off+io_width), shell+top_h-ethernet_z])
+                cube([shell+2*e, io_width, ethernet_z+e]);
             // molex power space
-            translate([shell+w-e, molex_off, shell+top_h-molex_z])
+            translate([shell+w-e, shell+molex_off, shell+top_h-molex_z])
                 cube([shell+2*e, molex_d, molex_z+e]);
             // control/sensor cable space
             for (y=[0, d+shell]) {
@@ -224,7 +234,7 @@ module case_top() {
             }
             // let some air out above usb/ethernet side
             translate([shell, shell*3, shell]) rotate([0, 0, 90])
-                ventilate(d-shell*2, top_h);
+                ventilate(d-shell*2, top_h-ethernet_z);
             // labels
             in=(shell/2)-e;
             rin=d+2*shell-in+(2*e);
@@ -259,41 +269,52 @@ module case_top() {
                     text(t, size=4, valign="bottom", halign="center", font="Liberation Sans:style=Bold");
             }
             for (labels=[
-                    ["V+", 0],
-                    ["V+", 5],
-                    ["V-", 10],
-                    ["V-", 15],
-                    ["E-", 22],
-                    ["E+", 28],
-                    ["B-", 35],
-                    ["B-", 40],
-                    ["B+", 45],
-                    ["B+", 50],
-                    ["H-", 57],
-                    ["H+", 62],
+                    ["+", 0],
+                    ["V", 5],
+                    ["V", 10],
+                    ["-", 13],
+                    ["-", 18],
+                    ["E", 22],
+                    ["E", 28],
+                    ["+", 32.5],
+                    ["-", 36],
+                    ["B", 40],
+                    ["B", 45],
+                    ["+", 49.5],
+                    ["-", 53],
+                    ["H", 57],
+                    ["H", 62],
+                    ["+", 66],
                 ]) {
                 t = labels[0];
                 y = labels[1] + 4 + molex_off; // indexed from first pin
-                translate([w+(2*shell)-in, y, shell/2+top_h-molex_z])
+                translate([w+(2*shell)-in, shell+y, (shell+top_h-molex_z)/2])
                     rotate([0, 90, 0])
                     linear_extrude(height=in+2*e)
-                    text(t, size=3, valign="center", halign="left", font="Liberation Sans:style=Bold");            }
+                    text(t, size=5, valign="center", halign="center", font="Liberation Sans:style=Bold");            }
         }
     }
     for (o=[
-            [shell, shell, 0],
-            [shell+w-top_clip_len, shell, 0],
-            [shell, d-(shell*1.5), shell*1.5],
-            [shell+w-top_clip_len, d-(shell/2), shell*1.5],
+            [0, 0],
+            [0, 1],
+            [1, 1],
+            [1, 0],
         ]) {
         x = o[0];
         y = o[1];
-        off = o[2];
-        translate([x, y, 0]) {
-            cube([top_clip_len, shell*1.5, shell+top_h+top_clip_offset+shell]);
-            translate([0, off, top_h+top_clip_offset+1.5*shell])
-                rotate([0, 90, 0])
-                cylinder(r=shell/2, h=top_clip_len, $fn=30);
+        translate([shell+w/2, shell+d/2])
+            mirror([x, 0, 0]) mirror([0, y, 0])
+            translate([-w/2, -d/2, 0]) {
+            difference() {
+                union() {
+                    cube([top_clip_len, shell*1.5, shell+top_h+top_clip_offset+shell]);
+                    translate([0, 0, top_h+top_clip_offset+1.5*shell])
+                        rotate([0, 90, 0])
+                        cylinder(r=shell/2, h=top_clip_len, $fn=30);
+                }
+                translate([-e, -shell, shell+top_h])
+                    cube([e+shell/4, shell*3, top_clip_offset+shell]);
+            }
         }
     }
 }
