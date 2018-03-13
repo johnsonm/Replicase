@@ -17,7 +17,7 @@ pcb_z = 1.4; // thickness of PCB
 w = 111; // x interior dimension
 d = 81; // y interior dimension
 bb_width = inches(2.15);
-y_off = d/2-bb_width/2 + inches(0.125); // BB edge offset from inside of shell
+y_off = (d/2-bb_width/2); // BB edge offset from inside of shell
 io_off = 3; // power/usb offset from board edge
 io_width = 36;
 usb_off = 39.5; // USB port under board offset from board edge
@@ -76,7 +76,7 @@ module standoff(x, y, z, r) {
 module fan_hole(x, y) {
     translate([x, y, -e]) {
         // fan area
-        cylinder(d=fan_diameter, h=shell+2*e);
+        cylinder(d=fan_diameter, h=shell+2*e, $fn=180);
         // mounting screw holes
         for (n=[[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
             translate([n[0]*fan_screw_off, n[1]*fan_screw_off, 0])
@@ -273,23 +273,21 @@ module case_top() {
                     ["V", 5],
                     ["V", 10],
                     ["-", 13],
-                    ["-", 18],
-                    ["E", 22],
-                    ["E", 28],
-                    ["+", 32.5],
-                    ["-", 36],
-                    ["B", 40],
-                    ["B", 45],
-                    ["+", 49.5],
+                    ["-", 20],
+                    ["E", 25],
+                    ["+", 30.5],
+                    ["-", 38],
+                    ["B", 43],
+                    ["+", 47.5],
                     ["-", 53],
                     ["H", 57],
                     ["H", 62],
                     ["+", 66],
                 ]) {
                 t = labels[0];
-                y = labels[1] + 4 + molex_off; // indexed from first pin
+                y = labels[1] + 3 + molex_off; // indexed from first pin
                 translate([w+(2*shell)-in, shell+y, (shell+top_h-molex_z)/2])
-                    rotate([0, 90, 0])
+                    rotate([90, 180, 90])
                     linear_extrude(height=in+2*e)
                     text(t, size=5, valign="center", halign="center", font="Liberation Sans:style=Bold");            }
         }
