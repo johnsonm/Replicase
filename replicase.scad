@@ -272,17 +272,17 @@ module case_top() {
                     ["+", 0],
                     ["V", 5],
                     ["V", 10],
-                    ["-", 13],
+                    ["-", 14],
                     ["-", 20],
                     ["E", 25],
                     ["+", 30.5],
                     ["-", 38],
                     ["B", 43],
-                    ["+", 47.5],
-                    ["-", 53],
-                    ["H", 57],
+                    ["B", 48],
+                    ["+", 53],
+                    ["-", 58],
                     ["H", 62],
-                    ["+", 66],
+                    ["+", 67],
                 ]) {
                 t = labels[0];
                 y = labels[1] + 3 + molex_off; // indexed from first pin
@@ -305,13 +305,14 @@ module case_top() {
             translate([-w/2, -d/2, 0]) {
             difference() {
                 union() {
-                    cube([top_clip_len, shell*1.5, shell+top_h+top_clip_offset+shell]);
+                    cube([top_clip_len, molex_off, shell+top_h+top_clip_offset+shell]);
                     translate([0, 0, top_h+top_clip_offset+1.5*shell])
                         rotate([0, 90, 0])
                         cylinder(r=shell/2, h=top_clip_len, $fn=30);
                 }
-                translate([-e, -shell, shell+top_h])
-                    cube([e+shell/4, shell*3, top_clip_offset+shell]);
+                // end cutout for easier fit
+                translate([-e, -shell, shell+top_h+e])
+                    cube([e+shell/4, shell+molex_off, top_clip_offset+shell]);
             }
         }
     }

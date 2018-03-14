@@ -14,8 +14,8 @@ case should snap together.  Press up on the bottom of the case
 while inserting the Beaglebone to slightly spread the clips
 when inserting or removing the Beaglebone.  The case clip legs
 are a bit fragile, so take care inserting them.  Insert both clips
-on one side, then gently pinch the others into the case, and slide
-together until it clicks.
+just inside the edge of one side, then gently pinch the legs on
+the other side into the case, and slide together until it clicks.
 
 For slicing, look at the example parameters at the end of the
 replicase.gcode file. In particular, print at least the layers with
